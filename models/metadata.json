@@ -1,0 +1,57 @@
+{
+  "best_model": "lightgbm",
+  "feature_cols": [
+    "hour",
+    "weekday",
+    "item_count",
+    "traffic_index",
+    "distance_km",
+    "is_peak_hour",
+    "is_weekend",
+    "hour_sin",
+    "hour_cos",
+    "day_sin",
+    "day_cos",
+    "distance_bucket",
+    "is_large_order",
+    "log_item_count",
+    "traffic_x_distance",
+    "peak_x_traffic",
+    "category_enc",
+    "weather_enc"
+  ],
+  "cv_results": {
+    "linear_regression": {
+      "mae": 4.806314427336053,
+      "rmse": 6.009225680681625,
+      "r2": 0.9222929520739885
+    },
+    "ridge": {
+      "mae": 4.806702408101816,
+      "rmse": 6.00921802418972,
+      "r2": 0.9222931641937926
+    },
+    "lasso": {
+      "mae": 4.856831941374402,
+      "rmse": 6.050958359944641,
+      "r2": 0.9212078637392134
+    },
+    "random_forest": {
+      "mae": 1.4001950442107682,
+      "rmse": 2.08024426655642,
+      "r2": 0.9906853894111837
+    },
+    "xgboost": {
+      "mae": 1.4234872459983827,
+      "rmse": 2.009388441164573,
+      "r2": 0.991310293618876
+    },
+    "lightgbm": {
+      "mae": 1.390974355485079,
+      "rmse": 1.972545570798006,
+      "r2": 0.9916245049064702
+    }
+  },
+  "n_train": 10000,
+  "n_features": 18
+}
