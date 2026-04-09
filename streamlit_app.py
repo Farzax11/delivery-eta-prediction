@@ -11,14 +11,12 @@ st.set_page_config(page_title="Delivery ETA Prediction System", layout="wide")
 
 st.markdown("""
     <style>
-        .main-title { font-size: 2.2rem; font-weight: 700; color: #1a1a2e; }
-        .sub-title  { font-size: 1rem; color: #555; margin-bottom: 1.5rem; }
         .block-container { padding-top: 2rem; }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<p class="main-title">Delivery ETA Prediction System</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Real-time monitoring for quick-commerce order delivery estimates</p>', unsafe_allow_html=True)
+st.title("Delivery ETA Prediction System")
+st.caption("Real-time monitoring for quick-commerce order delivery estimates")
 st.divider()
 
 page = st.sidebar.radio("Navigation", ["Overview", "Model Comparison", "Predictions Log"])
@@ -72,8 +70,9 @@ if page == "Overview":
 
     if not df.empty:
         st.subheader("ETA Distribution")
-        fig = px.histogram(df, x="eta_minutes", nbins=50,
-                           color_discrete_sequence=["#1a1a2e"])
+        fig = px.histogram(df[df["eta_minutes"] <= 90], x="eta_minutes", nbins=50,
+                           color_discrete_sequence=["#1a1a2e"],
+                           labels={"eta_minutes": "ETA (minutes)"})
         fig.update_layout(bargap=0.05)
         st.plotly_chart(fig, use_container_width=True)
 
