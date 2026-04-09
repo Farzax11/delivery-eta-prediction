@@ -63,6 +63,12 @@ preds = load_predictions_log()
 
 # ── Page: Predict ETA ──────────────────────────────────────────────────────────
 if page == "Predict ETA":
+
+    # Wake up the API silently in the background
+    try:
+        httpx.get(API_URL.replace("/predict", "/health"), timeout=5)
+    except Exception:
+        pass
     st.subheader("Enter Order Details")
 
     col1, col2 = st.columns(2)
@@ -94,7 +100,7 @@ if page == "Predict ETA":
         }
         with st.spinner("Predicting..."):
             try:
-                resp = httpx.post(API_URL, json=payload, timeout=30)
+                resp = httpx.post(API_URL, json=payload, timeout=60)
                 resp.raise_for_status()
                 data = resp.json()
                 c1, c2, c3 = st.columns(3)
