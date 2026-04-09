@@ -4,41 +4,16 @@ A production-style machine learning system that predicts delivery ETA for quick-
 
 ---
 
-## Live URLs
+## Live Demo
 
-| What | URL |
-|------|-----|
-| Dashboard + Prediction | https://delivery-eta-prediction.streamlit.app |
-| API Docs (Swagger UI) | https://delivery-eta-prediction.onrender.com/docs |
-| API Health Check | https://delivery-eta-prediction.onrender.com/health |
-| GitHub Repo | https://github.com/Farzax11/delivery-eta-prediction |
+| | URL |
+|--|-----|
+| Dashboard | https://delivery-eta-prediction.streamlit.app |
+| API Docs | https://delivery-eta-prediction.onrender.com/docs |
+| API Health | https://delivery-eta-prediction.onrender.com/health |
 
----
-
-## Before You Demo
-
-The API runs on Render free tier and sleeps after 15 minutes of inactivity.
-
-**Always do this first:**
-1. Open https://delivery-eta-prediction.onrender.com/health in your browser
-2. Wait until you see `{"status":"ok","model_loaded":true}`
-3. Then open the dashboard and predict
-
-This takes about 30 seconds on a cold start.
-
----
-
-## What to Show
-
-**For a general demo** — open the dashboard:
-- Go to "Predict ETA" in the sidebar
-- Fill in order details and click Predict
-- Shows predicted delivery time with confidence level
-
-**For a technical interview** — open the API docs:
-- Go to POST /predict → "Try it out"
-- Fill in the JSON and click Execute
-- Shows live prediction with model name and confidence
+> The API runs on Render free tier and may take ~30 seconds to wake up after inactivity.
+> Open the health check URL first and wait for `{"status":"ok"}` before using the dashboard.
 
 ---
 
@@ -54,6 +29,7 @@ Quick-commerce promises 10–30 minute deliveries. Accurate ETA prediction is cr
 - 5-fold cross-validation for model selection
 - Best model: LightGBM (CV MAE ~1.39 min, R² ~0.97)
 - Features: haversine distance, cyclical time encoding, traffic index, weather, order size
+- Drift detection using KS test with auto-retraining trigger
 
 ---
 
@@ -74,7 +50,7 @@ Quick-commerce promises 10–30 minute deliveries. Accurate ETA prediction is cr
 │   └── retrain_pipeline.py     # Auto-retrain trigger
 ├── sql/
 │   └── setup.py                # SQL views and analytical queries
-├── streamlit_app.py            # Combined dashboard + prediction UI
+├── streamlit_app.py            # Dashboard and prediction UI
 ├── Dockerfile
 └── requirements.txt
 ```
@@ -84,23 +60,10 @@ Quick-commerce promises 10–30 minute deliveries. Accurate ETA prediction is cr
 ## Run Locally
 
 ```bash
-# Install dependencies
 pip install -r requirements.txt
-
-# Train models
 python src/train.py
-
-# Start API
 uvicorn api.app:app --reload --port 8080
-
-# Start dashboard
 streamlit run streamlit_app.py
-
-# Simulate requests
-python api/simulate.py
-
-# Check drift
-python monitoring/drift_detector.py
 ```
 
 ---
