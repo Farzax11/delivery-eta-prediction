@@ -63,11 +63,11 @@ preds = load_predictions_log()
 
 if page == "Overview":
     if meta:
+        cv = meta.get("cv_results", {}).get(meta.get("best_model", ""), {})
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Best Model",    meta.get("best_model", "N/A"))
+        c1.metric("Best Model",    meta.get("best_model", "N/A").replace("_", " ").title())
         c2.metric("Training Rows", f"{meta.get('n_train', 0):,}")
         c3.metric("Features",      meta.get("n_features", 0))
-        cv = meta.get("cv_results", {}).get(meta.get("best_model", ""), {})
         c4.metric("CV MAE",        f"{cv.get('mae', 0):.2f} min")
 
     if not df.empty:
