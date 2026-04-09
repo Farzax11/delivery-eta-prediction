@@ -11,6 +11,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from loguru import logger
 from monitoring.tracker import log_prediction
@@ -21,6 +22,13 @@ app = FastAPI(
     title="Delivery ETA Prediction API",
     description="Predicts delivery time (minutes) for quick-commerce orders.",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ── Load model at startup ──────────────────────────────────────────────────────
