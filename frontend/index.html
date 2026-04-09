@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Delivery ETA Prediction</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 1.9rem;
+      color: #1a1a2e;
+      font-weight: 700;
+    }
+
+    header p {
+      color: #666;
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #999;
+      margin: 20px 0 10px;
+    }
+
+    .section-label:first-child { margin-top: 0; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    label {
+      font-size: 0.82rem;
+      color: #444;
+      font-weight: 500;
+    }
+
+    input, select {
+      padding: 9px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #1a1a2e;
+      background: #fafafa;
+      transition: border 0.2s;
+      outline: none;
+    }
+
+    input:focus, select:focus { border-color: #1a1a2e; background: #fff; }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 13px;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover  { background: #2d2d4e; }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+
+    .result {
+      margin-top: 24px;
+      border-radius: 10px;
+      padding: 20px 24px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    .result.success { background: #f0fdf4; border: 1.5px solid #86efac; }
+    .result.error   { background: #fff1f2; border: 1.5px solid #fca5a5; }
+
+    .eta-value {
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      line-height: 1;
+    }
+
+    .eta-unit { font-size: 1rem; color: #666; margin-left: 4px; }
+
+    .meta {
+      margin-top: 10px;
+      font-size: 0.83rem;
+      color: #555;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge.High   { background: #dcfce7; color: #166534; }
+    .badge.Medium { background: #fef9c3; color: #854d0e; }
+    .badge.Low    { background: #fee2e2; color: #991b1b; }
+
+    .error-msg { color: #dc2626; font-size: 0.9rem; }
+
+    .spinner {
+      display: none;
+      width: 20px; height: 20px;
+      border: 3px solid #ffffff55;
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      margin-top: 28px;
+      font-size: 0.78rem;
+      color: #aaa;
+      text-align: center;
+    }
+
+    footer a { color: #1a1a2e; text-decoration: none; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Delivery ETA Prediction</h1>
+  <p>Quick-commerce order delivery time estimator</p>
+</header>
+
+<div class="card">
+
+  <div class="section-label">Location</div>
+  <div class="row">
+    <div class="field">
+      <label>Order Latitude</label>
+      <input type="number" id="order_lat" value="12.97" step="0.001"/>
+    </div>
+    <div class="field">
+      <label>Order Longitude</label>
+      <input type="number" id="order_lon" value="77.59" step="0.001"/>
+    </div>
+    <div class="field">
+      <label>Warehouse Latitude</label>
+      <input type="number" id="wh_lat" value="12.93" step="0.001"/>
+    </div>
+    <div class="field">
+      <label>Warehouse Longitude</label>
+      <input type="number" id="wh_lon" value="77.55" step="0.001"/>
+    </div>
+  </div>
+
+  <div class="section-label">Order Details</div>
+  <div class="row">
+    <div class="field">
+      <label>Category</label>
+      <select id="category">
+        <option>Groceries</option>
+        <option>Snacks</option>
+        <option>Dairy</option>
+        <option>Beverages</option>
+        <option>Personal Care</option>
+        <option>Frozen</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Item Count</label>
+      <input type="number" id="item_count" value="5" min="1" max="50"/>
+    </div>
+  </div>
+
+  <div class="section-label">Time & Conditions</div>
+  <div class="row">
+    <div class="field">
+      <label>Hour (0–23)</label>
+      <input type="number" id="hour" value="19" min="0" max="23"/>
+    </div>
+    <div class="field">
+      <label>Weekday (0=Mon)</label>
+      <input type="number" id="weekday" value="4" min="0" max="6"/>
+    </div>
+    <div class="field">
+      <label>Weather</label>
+      <select id="weather">
+        <option>Clear</option>
+        <option>Cloudy</option>
+        <option>Rainy</option>
+        <option>Heavy Rain</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Traffic Index (0–1)</label>
+      <input type="number" id="traffic_index" value="0.65" min="0" max="1" step="0.01"/>
+    </div>
+  </div>
+
+  <button id="predictBtn" onclick="predict()">
+    <span id="btnText">Predict ETA</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+  <div class="result" id="result">
+    <div id="resultContent"></div>
+  </div>
+
+</div>
+
+<footer>
+  Powered by LightGBM &nbsp;|&nbsp;
+  <a href="https://delivery-eta-prediction.onrender.com/docs" target="_blank">API Docs</a>
+</footer>
+
+<script>
+  const API = "https://delivery-eta-prediction.onrender.com/predict";
+
+  async function predict() {
+    const btn     = document.getElementById("predictBtn");
+    const spinner = document.getElementById("spinner");
+    const btnText = document.getElementById("btnText");
+    const result  = document.getElementById("result");
+
+    btn.disabled    = true;
+    btnText.style.display  = "none";
+    spinner.style.display  = "block";
+    result.style.display   = "none";
+
+    const payload = {
+      order_lat:     parseFloat(document.getElementById("order_lat").value),
+      order_lon:     parseFloat(document.getElementById("order_lon").value),
+      wh_lat:        parseFloat(document.getElementById("wh_lat").value),
+      wh_lon:        parseFloat(document.getElementById("wh_lon").value),
+      hour:          parseInt(document.getElementById("hour").value),
+      weekday:       parseInt(document.getElementById("weekday").value),
+      item_count:    parseInt(document.getElementById("item_count").value),
+      category:      document.getElementById("category").value,
+      weather:       document.getElementById("weather").value,
+      traffic_index: parseFloat(document.getElementById("traffic_index").value),
+    };
+
+    try {
+      const resp = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+
+      result.className = "result success";
+      result.innerHTML = `
+        <div class="eta-value">${data.eta_minutes}<span class="eta-unit">min</span></div>
+        <div class="meta">
+          <span>Model: ${data.model_used}</span>
+          <span>Confidence: <span class="badge ${data.confidence}">${data.confidence}</span></span>
+        </div>
+      `;
+    } catch (err) {
+      result.className = "result error";
+      result.innerHTML = `<div class="error-msg">Error: ${err.message}. The API may be waking up — try again in 30 seconds.</div>`;
+    } finally {
+      btn.disabled           = false;
+      btnText.style.display  = "inline";
+      spinner.style.display  = "none";
+      result.style.display   = "block";
+    }
+  }
+</script>
+
+</body>
+</html>
